@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/viewGroup"
+    tools:context="com.example.android.punetourguide.MainActivity">
+
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:id="@+id/imageViewBookIcon"
+        android:layout_alignParentTop="true"
+        android:layout_margin="10dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Book Name"
+        android:id="@+id/textViewBookName"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/imageViewBookIcon"
+        android:layout_toEndOf="@+id/imageViewBookIcon" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Author : "
+        android:id="@+id/textViewAuthorName"
+        android:layout_below="@+id/textViewBookName"
+        android:layout_alignLeft="@+id/textViewBookName"
+        android:layout_alignStart="@+id/textViewBookName" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Publisher"
+        android:id="@+id/textViewPublisher"
+        android:layout_below="@+id/textViewAuthorName"
+        android:layout_alignLeft="@+id/textViewAuthorName"
+        android:layout_alignStart="@+id/textViewAuthorName" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Published Date"
+        android:id="@+id/textViewPublishedDate"
+        android:layout_below="@+id/textViewPublisher"
+        android:layout_alignLeft="@+id/textViewPublisher"
+        android:layout_alignStart="@+id/textViewPublisher" />
+</RelativeLayout>

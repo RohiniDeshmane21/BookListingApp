@@ -40,9 +40,4 @@ public class bookInfo {
         return image;
     }
 
-    /* public boolean hasImage()
-    {
-        return attractionPhoto != NO_IMAGE_PROVIDED;
-    }*/
-
 }

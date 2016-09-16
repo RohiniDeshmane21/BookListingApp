@@ -1,7 +1,7 @@
 package com.example.android.booklistingapp;
 
 
-import android.app.Activity;
+import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -14,18 +14,23 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,13 +58,30 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 progress.setVisibility(View.VISIBLE);
                 progress.setProgress(0);
-                if(!booklist.isEmpty())
-                {
-                   booklist.clear();
+                if (!booklist.isEmpty()) {
+                    booklist.clear();
 
                 }
-                String url = "https://www.googleapis.com/books/v1/volumes?q="+ searchString.getText().toString().trim() + "&maxResults=10";
-                new HttpAsyncTask().execute(url);
+                try {
+                    String enteredText = URLEncoder.encode(searchString.getText().toString(), "utf-8");
+
+                    String url = "https://www.googleapis.com/books/v1/volumes?q=" + enteredText + "&maxResults=10";
+
+                    ConnectivityManager cm =
+                            (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+                    NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+                    boolean isConnected = activeNetwork != null &&
+                            activeNetwork.isConnectedOrConnecting();
+
+                    if (isConnected == true) {
+                        new HttpAsyncTask().execute(url);
+                    }
+
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+
             }
         });
 
@@ -78,31 +100,55 @@ public class MainActivity extends AppCompatActivity {
     public String GET(String url){
         InputStream inputStream = null;
         String result = "";
-        try {
+        StringBuilder total = null;
+        HttpsURLConnection urlConnection = null;
 
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
+        try
+        {
+            URL urlVar = new URL(url);
+            urlConnection =
+                    (HttpsURLConnection) urlVar.openConnection();
 
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+            urlConnection.setConnectTimeout(20000);
+            urlConnection.setReadTimeout(20000);
+            urlConnection.setRequestMethod("GET");
+            urlConnection.setRequestProperty("Content-Type", "application/json");
+            urlConnection.connect();
 
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
 
-            // convert inputstream to string
-            if(inputStream != null)
-            {
-                result = convertInputStreamToString(inputStream);
-
+            int statusCode = urlConnection.getResponseCode();
+            if (statusCode != HttpURLConnection.HTTP_ACCEPTED) {
+               // Log.d(TAG, "doInBackground(): connection failed: statusCode: " + statusCode);
+                //                    return null;
             }
-            else
-                result = "Did not work!";
 
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
+            InputStream in = new BufferedInputStream(
+                    urlConnection.getInputStream());
+
+            BufferedReader r = new BufferedReader(new InputStreamReader(in));
+            total = new StringBuilder();
+            String line;
+            while ((line = r.readLine()) != null) {
+                total.append(line).append('\n');
+            }
+
+            Log.d("InputStream",in.toString());
+        }
+        catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (urlConnection != null) {
+                urlConnection.disconnect();
+            }
         }
 
-        return result;
+        return total.toString();
     }
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException{
@@ -117,14 +163,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public boolean isConnected(){
-        ConnectivityManager connMgr = (ConnectivityManager) getSystemService(Activity.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected())
-            return true;
-        else
-            return false;
-    }
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {

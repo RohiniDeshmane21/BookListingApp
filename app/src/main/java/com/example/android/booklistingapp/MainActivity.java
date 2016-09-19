@@ -2,6 +2,8 @@ package com.example.android.booklistingapp;
 
 
 import android.content.Context;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -13,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,22 +39,32 @@ public class MainActivity extends AppCompatActivity {
 
     EditText searchString;
     Button btnSearch;
+    TextView msg;
     ArrayList<bookInfo> booklist = new ArrayList<bookInfo>();
     ProgressBar progress;
+
+    private RetainedFragment dataFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         btnSearch = (Button)findViewById(R.id.buttonSearch);
+        msg = (TextView) findViewById(R.id.textView);
+
         progress = (ProgressBar)findViewById(R.id.progressBar);
         progress.setMax(10);
         progress.setVisibility(View.GONE);
+        msg.setVisibility(View.VISIBLE);
+
         searchString = (EditText) findViewById(R.id.editTextBookName);
        // final String search = searchString.getText().toString();
 
         setTitle("Book List");
+
+        final String enteredText = "";
 
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,6 +98,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        // put your code here...
+
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+
+        setContentView(R.layout.activity_main);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+    /*Save your data to be restored here
+    Example : outState.putLong("time_state", time); , time is a long variable*/
+        super.onSaveInstanceState(outState);
     }
 
     public void showData(ArrayList<bookInfo> booklistNew)
@@ -166,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
     private class HttpAsyncTask extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
+
             String result = GET(urls[0]);
 
             JSONObject jsonObject = null;
@@ -196,6 +233,8 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
            // Toast.makeText(getBaseContext(), "Received!", Toast.LENGTH_LONG).show();
             showData(booklist);
+            msg.setVisibility(View.GONE);
+
             progress.setVisibility(View.GONE);
         }
     }
